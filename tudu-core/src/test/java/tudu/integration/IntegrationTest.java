@@ -129,6 +129,7 @@ public class IntegrationTest extends AbstractAspectjJpaTests {
         todoList.setName("test_list");
 
         assertEquals(1, userManager.getCurrentUser().getTodoLists().size());
+        
         todoListsManager.createTodoList(todoList);
         assertEquals(2, userManager.getCurrentUser().getTodoLists().size());
         todoListsManager.deleteTodoList(todoList.getListId());
