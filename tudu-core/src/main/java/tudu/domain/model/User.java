@@ -47,7 +47,7 @@ public class User implements Serializable, Comparable<User> {
 
     private Date lastAccessDate;
 
-    private boolean enabled = false;
+    private boolean enabled;
 
     private String dateFormat;
 
@@ -113,7 +113,8 @@ public class User implements Serializable, Comparable<User> {
     }
 
     public boolean isEnabled() {
-        return enabled;
+        //return enabled;
+    	return false;
     }
 
     public void setEnabled(boolean enabled) {
