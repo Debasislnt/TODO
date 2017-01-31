@@ -1,17 +1,26 @@
-package tudu.domain.model.comparator;
+package tudu.domain.comparator;
+
+import org.junit.Test;
+import tudu.domain.Todo;
+import tudu.domain.User;
 
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.TreeSet;
 
-import tudu.domain.model.Todo;
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
 
-public class TodoByDescriptionAscComparatorTest extends TestCase {
+public class TodoByAssignedUserAscComparatorTest {
 
-    @SuppressWarnings("unchecked")
+    @Test
     public void testCompare() {
+        User userA = new User();
+        userA.setLogin("a");
+
+        User userB = new User();
+        userB.setLogin("b");
+
         Todo todo1 = new Todo();
         todo1.setTodoId("01");
         todo1.setCompleted(false);
@@ -19,6 +28,7 @@ public class TodoByDescriptionAscComparatorTest extends TestCase {
         todo1.setPriority(0);
 
         Todo todo2 = new Todo();
+        todo2.setAssignedUser(userB);
         todo2.setTodoId("02");
         todo2.setCompleted(false);
         todo2.setDescription("aa");
@@ -31,12 +41,14 @@ public class TodoByDescriptionAscComparatorTest extends TestCase {
         todo3.setPriority(10);
 
         Todo todo4 = new Todo();
+        todo4.setAssignedUser(userA);
         todo4.setTodoId("04");
         todo4.setCompleted(false);
         todo4.setDescription("bb");
         todo4.setPriority(10);
 
         Todo todo5 = new Todo();
+        todo5.setAssignedUser(userA);
         todo5.setTodoId("05");
         todo5.setCompleted(true);
         todo5.setDescription("cc");
@@ -48,7 +60,7 @@ public class TodoByDescriptionAscComparatorTest extends TestCase {
         todo6.setDescription("aa");
         todo6.setPriority(10);
 
-        Comparator comparator = new TodoByDescriptionAscComparator();
+        Comparator<Todo> comparator = new TodoByAssignedUserAscComparator();
         Collection<Todo> sortedTodos = new TreeSet<Todo>(comparator);
         sortedTodos.add(todo2);
         sortedTodos.add(todo4);
@@ -63,14 +75,14 @@ public class TodoByDescriptionAscComparatorTest extends TestCase {
         Todo testTodo = iterator.next();
         assertEquals("01", testTodo.getTodoId());
         testTodo = iterator.next();
-        assertEquals("04", testTodo.getTodoId());
+        assertEquals("03", testTodo.getTodoId());
         testTodo = iterator.next();
         assertEquals("02", testTodo.getTodoId());
         testTodo = iterator.next();
-        assertEquals("03", testTodo.getTodoId());
-        testTodo = iterator.next();
-        assertEquals("05", testTodo.getTodoId());
+        assertEquals("04", testTodo.getTodoId());
         testTodo = iterator.next();
         assertEquals("06", testTodo.getTodoId());
+        testTodo = iterator.next();
+        assertEquals("05", testTodo.getTodoId());
     }
 }

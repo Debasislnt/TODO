@@ -1,73 +1,56 @@
 package tudu.integration;
 
-import javax.sql.DataSource;
-
-import org.acegisecurity.context.SecurityContextHolder;
-import org.acegisecurity.context.SecurityContextImpl;
-import org.acegisecurity.providers.ProviderManager;
-import org.acegisecurity.providers.UsernamePasswordAuthenticationToken;
-import org.acegisecurity.userdetails.UserDetails;
-import org.acegisecurity.userdetails.UserDetailsService;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.orm.ObjectRetrievalFailureException;
-import org.springframework.test.jpa.AbstractAspectjJpaTests;
-import org.springframework.transaction.PlatformTransactionManager;
-
-import tudu.domain.RolesEnum;
-import tudu.domain.model.Role;
-import tudu.domain.model.Todo;
-import tudu.domain.model.TodoList;
-import tudu.domain.model.User;
-import tudu.service.TodoListsManager;
-import tudu.service.TodosManager;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextImpl;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
+import tudu.domain.*;
+import tudu.service.TodoListsService;
+import tudu.service.TodosService;
 import tudu.service.UserAlreadyExistsException;
-import tudu.service.UserManager;
+import tudu.service.UserService;
 
-public class IntegrationTest extends AbstractAspectjJpaTests {
+import static org.junit.Assert.*;
 
-    private UserManager userManager;
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations={"classpath*:/META-INF/spring/application-context-test.xml"})
+public class IntegrationTest {
 
-    private TodoListsManager todoListsManager;
+    private final Log log = LogFactory.getLog(IntegrationTest.class);
 
-    private TodosManager todosManager;
+    @Autowired
+    private UserService userService;
 
-    public IntegrationTest() {
-        super();
-        this.setAutowireMode(AUTOWIRE_NO);
-    }
+    @Autowired
+    private TodoListsService todoListsService;
 
-    @Override
-    protected String[] getConfigLocations() {
-        return new String[] {
-                "classpath:/tudu/domain/applicationContext-jpa.xml",
-                "classpath:/tudu/service/applicationContext.xml",
-                "classpath:/tudu/security/applicationContext-security.xml" };
-    }
+    @Autowired
+    private TodosService todosService;
 
-    @Override
-    protected void injectDependencies() throws Exception {        
-        this.setDataSource((DataSource) 
-                this.applicationContext.getBean("dataSource"));
-        
-        this.setTransactionManager((PlatformTransactionManager) 
-                this.applicationContext.getBean("transactionManager"));
-    }
+    @Autowired
+    private UserDetailsService userDetailsService;
 
-    @Override
-    protected void onSetUpBeforeTransaction() throws Exception {
-        super.onSetUpBeforeTransaction();
-        userManager = (UserManager) this.applicationContext
-                .getBean("userManager");
+    @Autowired
+    @Qualifier("authenticationManager")
+    private AuthenticationManager authenticationManager;
 
-        todoListsManager = (TodoListsManager) this.applicationContext
-                .getBean("todoListsManager");
-
-        todosManager = (TodosManager) this.applicationContext
-                .getBean("todosManager");
-    }
-
-    public void testCreateUser() {
+    @Test
+    @Transactional
+    public void createUser() {
         try {
-            userManager.findUser("test_user");
+            userService.findUser("test_user");
             fail("User already exists in the database.");
         } catch (ObjectRetrievalFailureException orfe) {
             // User should not already exist in the database.
@@ -77,8 +60,10 @@ public class IntegrationTest extends AbstractAspectjJpaTests {
         user.setLogin("test_user");
         user.setFirstName("First name");
         user.setLastName("Last name");
+        user.setPassword("password");
+        user.setVerifyPassword("password");
         try {
-            userManager.createUser(user);
+            userService.createUser(user);
             assertTrue(user.isEnabled());
             assertNotNull(user.getCreationDate());
             assertNotNull(user.getLastAccessDate());
@@ -94,7 +79,7 @@ public class IntegrationTest extends AbstractAspectjJpaTests {
         }
 
         try {
-            User userFoundInDatabase = userManager.findUser("test_user");
+            User userFoundInDatabase = userService.findUser("test_user");
             assertEquals("First name", userFoundInDatabase.getFirstName());
             assertEquals("Last name", userFoundInDatabase.getLastName());
         } catch (ObjectRetrievalFailureException orfe) {
@@ -102,97 +87,113 @@ public class IntegrationTest extends AbstractAspectjJpaTests {
         }
     }
 
-    public void testCreateTodoList() {
+    @Test
+    @Transactional
+    public void createTodoList() {
         createAuthenticatedUser();
 
         TodoList todoList = new TodoList();
         todoList.setName("test_list");
 
-        assertEquals(1, userManager.getCurrentUser().getTodoLists().size());
+        assertEquals(1, userService.getCurrentUser().getTodoLists().size());
 
-        todoListsManager.createTodoList(todoList);
+        todoListsService.createTodoList(todoList);
 
         assertEquals(1, todoList.getUsers().size());
         assertEquals("test_user", todoList.getUsers().iterator().next()
                 .getLogin());
-        assertEquals(2, userManager.getCurrentUser().getTodoLists().size());
+        assertEquals(2, userService.getCurrentUser().getTodoLists().size());
 
-        TodoList todoListFromDatabase = todoListsManager.findTodoList(todoList
+        TodoList todoListFromDatabase = todoListsService.findTodoList(todoList
                 .getListId());
         assertEquals("test_list", todoListFromDatabase.getName());
     }
 
+    @Test
+    @Transactional
     public void testDeleteTodoList() {
         createAuthenticatedUser();
 
         TodoList todoList = new TodoList();
         todoList.setName("test_list");
 
-        assertEquals(1, userManager.getCurrentUser().getTodoLists().size());
-        todoListsManager.createTodoList(todoList);
-        assertEquals(2, userManager.getCurrentUser().getTodoLists().size());
-        todoListsManager.deleteTodoList(todoList.getListId());
-        assertEquals(1, userManager.getCurrentUser().getTodoLists().size());
+        assertEquals(1, userService.getCurrentUser().getTodoLists().size());
+        todoListsService.createTodoList(todoList);
+        assertEquals(2, userService.getCurrentUser().getTodoLists().size());
+        todoListsService.deleteTodoList(todoList.getListId());
+        assertEquals(1, userService.getCurrentUser().getTodoLists().size());
 
         try {
-            todoListsManager.findTodoList(todoList.getListId());
+            todoListsService.findTodoList(todoList.getListId());
             fail("The todo list should have been deleted");
         } catch (ObjectRetrievalFailureException orfe) {
             // The todo list should not exist.
         }
     }
 
-    public void testCreateTodo() {
+    @Test
+    @Transactional
+    public void createTodo() {
         createAuthenticatedUser();
 
         TodoList todoList = new TodoList();
-        todoListsManager.createTodoList(todoList);
+        todoListsService.createTodoList(todoList);
 
         Todo todo = new Todo();
         todo.setDescription("test_todo");
 
-        todosManager.createTodo(todoList.getListId(), todo);
+        todosService.createTodo(todoList.getListId(), todo);
         assertNotNull(todo.getCreationDate());
         assertEquals(1, todoList.getTodos().size());
     }
 
-    public void testDeleteTodo() {
+    @Test
+    @Transactional
+    public void deleteTodo() {
         createAuthenticatedUser();
 
         TodoList todoList = new TodoList();
-        todoListsManager.createTodoList(todoList);
+        todoList.setName("My List");
+        todoListsService.createTodoList(todoList);
+        assertEquals(0, todoList.getTodos().size());
 
         Todo todo = new Todo();
         todo.setDescription("test_todo");
+        todosService.createTodo(todoList.getListId(), todo);
+        assertNotNull(todosService.findTodo(todo.getTodoId()));
+        assertEquals(1, todoList.getTodos().size());
 
-        todosManager.createTodo(todoList.getListId(), todo);
-        todosManager.deleteTodo(todo.getTodoId());
-        assertEquals(0, todoList.getTodos().size());
+        todosService.deleteTodo(todo);
+        TodoList todoList2 = todoListsService.findTodoList(todoList.getListId());
+        assertNull(todosService.findTodo(todo.getTodoId()));
+        assertEquals(0, todoList2.getTodos().size());
     }
 
-    public void testSharedList() {
+    @Test
+    @Transactional
+    public void sharedList() {
         createAuthenticatedUser();
         User user2 = new User();
         user2.setLogin("test_user2");
         user2.setPassword("test_password");
         try {
-            userManager.createUser(user2);
+            userService.createUser(user2);
         } catch (UserAlreadyExistsException e) {
             fail("User already exists in the database.");
         }
         TodoList todoList = new TodoList();
-        todoListsManager.createTodoList(todoList);
-        todoListsManager.addTodoListUser(todoList.getListId(), "test_user2");
+        todoListsService.createTodoList(todoList);
+        todoListsService.addTodoListUser(todoList.getListId(), "test_user2");
         assertEquals(2, todoList.getUsers().size());
         assertEquals(2, user2.getTodoLists().size());
 
         Todo todo = new Todo();
         todo.setDescription("test_todo");
-        todosManager.createTodo(todoList.getListId(), todo);
+        todosService.createTodo(todoList.getListId(), todo);
         assertEquals(1, todoList.getTodos().size());
 
-        todoListsManager.deleteTodoList(todoList.getListId());
-        assertEquals(1, userManager.getCurrentUser().getTodoLists().size());
+        todoListsService.deleteTodoList(todoList.getListId());
+        assertEquals(1, userService.getCurrentUser().getTodoLists().size());
         assertEquals(1, user2.getTodoLists().size());
     }
 
@@ -203,26 +204,22 @@ public class IntegrationTest extends AbstractAspectjJpaTests {
         User user = new User();
         user.setLogin("test_user");
         user.setPassword("test_password");
+        user.setFirstName("Test");
+        user.setLastName("User");
         try {
-            userManager.createUser(user);
+            userService.createUser(user);
         } catch (UserAlreadyExistsException e) {
             fail("User already exists in the database.");
         }
 
         SecurityContextImpl secureContext = new SecurityContextImpl();
 
-        UserDetailsService userDetailsService = (UserDetailsService) this.applicationContext
-                .getBean("userDetailsService");
-
         UserDetails userDetails = userDetailsService
                 .loadUserByUsername("test_user");
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
                 userDetails, "test_password");
 
-        ProviderManager authenticationManager = (ProviderManager) this.applicationContext
-                .getBean("authenticationManager");
-
-        authenticationManager.doAuthentication(token);
+        authenticationManager.authenticate(token);
         secureContext.setAuthentication(token);
         SecurityContextHolder.setContext(secureContext);
     }

@@ -1,17 +1,15 @@
-package tudu.domain.model.comparator;
+package tudu.domain.comparator;
 
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.TreeSet;
+import org.junit.Test;
+import tudu.domain.Todo;
 
-import tudu.domain.model.Todo;
-import junit.framework.TestCase;
+import java.util.*;
 
-public class TodoByDueDateComparatorTest extends TestCase {
+import static org.junit.Assert.assertEquals;
 
-    @SuppressWarnings("unchecked")
+public class TodoByDueDateAscComparatorTest {
+
+    @Test
     public void testCompare() {
         Todo todo1 = new Todo();
         todo1.setTodoId("01");
@@ -60,7 +58,7 @@ public class TodoByDueDateComparatorTest extends TestCase {
         todo8.setTodoId("08");
         todo8.setCompleted(true);
 
-        Comparator comparator = new TodoByDueDateComparator();
+        Comparator<Todo> comparator = new TodoByDueDateAscComparator();
         Collection<Todo> sortedTodos = new TreeSet<Todo>(comparator);
         sortedTodos.add(todo3);
         sortedTodos.add(todo2);
@@ -75,20 +73,20 @@ public class TodoByDueDateComparatorTest extends TestCase {
         Iterator<Todo> iterator = sortedTodos.iterator();
 
         Todo testTodo = iterator.next();
-        assertEquals("04", testTodo.getTodoId());
-        testTodo = iterator.next();
-        assertEquals("01", testTodo.getTodoId());
-        testTodo = iterator.next();
-        assertEquals("03", testTodo.getTodoId());
+        assertEquals("05", testTodo.getTodoId());
         testTodo = iterator.next();
         assertEquals("02", testTodo.getTodoId());
         testTodo = iterator.next();
-        assertEquals("05", testTodo.getTodoId());
+        assertEquals("03", testTodo.getTodoId());
         testTodo = iterator.next();
-        assertEquals("06", testTodo.getTodoId());
+        assertEquals("01", testTodo.getTodoId());
+        testTodo = iterator.next();
+        assertEquals("04", testTodo.getTodoId());
+        testTodo = iterator.next();
+        assertEquals("08", testTodo.getTodoId());
         testTodo = iterator.next();
         assertEquals("07", testTodo.getTodoId());
         testTodo = iterator.next();
-        assertEquals("08", testTodo.getTodoId());
+        assertEquals("06", testTodo.getTodoId());
     }
 }

@@ -1,24 +1,25 @@
 package tudu.security;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
-import junit.framework.TestCase;
-
-import org.acegisecurity.userdetails.UserDetails;
-
+import org.easymock.EasyMock;
+import org.junit.Test;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.test.util.ReflectionTestUtils;
+import tudu.domain.Role;
 import tudu.domain.RolesEnum;
-import tudu.domain.model.Role;
-import tudu.domain.model.User;
-import tudu.service.UserManager;
+import tudu.domain.User;
+import tudu.service.UserService;
 
-public class UserDetailsServiceImplTest extends TestCase {
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
+public class UserDetailsServiceImplTest {
+
+    @Test
     public void testLoadUserByUsername() {
-        UserDetailsServiceImpl authenticationDAO = new UserDetailsServiceImpl();
-        UserManager userManager = createMock(UserManager.class);
-        authenticationDAO.setUserManager(userManager);
+        UserDetailsServiceImpl userDetailService = new UserDetailsServiceImpl();
+        UserService userService = EasyMock.createMock(UserService.class);
+        ReflectionTestUtils.setField(userDetailService, "userService", userService);
 
         User user = new User();
         user.setLogin("test_user");
@@ -27,22 +28,20 @@ public class UserDetailsServiceImplTest extends TestCase {
         Role userRole = new Role();
         userRole.setRole(RolesEnum.ROLE_USER.toString());
         user.getRoles().add(userRole);
-        expect(userManager.findUser("test_user")).andReturn(user);
+        expect(userService.findUser("test_user")).andReturn(user);
 
-        userManager.updateUser(user);
+        replay(userService);
 
-        replay(userManager);
-
-        UserDetails acegiUser = authenticationDAO
+        UserDetails springSecurityUser = userDetailService
                 .loadUserByUsername("test_user");
 
-        assertEquals(user.getLogin(), acegiUser.getUsername());
-        assertEquals(user.getPassword(), acegiUser.getPassword());
+        assertEquals(user.getLogin(), springSecurityUser.getUsername());
+        assertEquals(user.getPassword(), springSecurityUser.getPassword());
         assertNotNull(user.getLastAccessDate());
-        assertEquals(1, acegiUser.getAuthorities().length);
+        assertEquals(1, springSecurityUser.getAuthorities().size());
         assertEquals(RolesEnum.ROLE_USER.toString(),
-                acegiUser.getAuthorities()[0].getAuthority());
+                springSecurityUser.getAuthorities().iterator().next().getAuthority());
 
-        verify(userManager);
+        verify(userService);
     }
 }

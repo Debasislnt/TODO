@@ -1,13 +1,18 @@
 package tudu.domain.model;
 
+import org.junit.Test;
+import tudu.domain.Todo;
+
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.TreeSet;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
 
-public class TodoTest extends TestCase {
+public class TodoTest {
 
+    @Test
     public void testCompareTo() {
         Todo todo1 = new Todo();
         todo1.setTodoId("01");
@@ -70,6 +75,7 @@ public class TodoTest extends TestCase {
         assertEquals("02", testTodo.getTodoId());
     }
 
+    @Test
     public void testEquals() {
         Todo todo1 = new Todo();
         todo1.setTodoId("001");
