@@ -1,1 +1,1 @@
-﻿C:\Users\devopsci\sonar\runner\bin\sonar-runner.bat
+﻿C:\Users\devopsvm\sonar\runner\runner\bin\sonar-runner.bat
