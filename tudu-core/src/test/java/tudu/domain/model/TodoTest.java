@@ -57,17 +57,17 @@ public class TodoTest extends TestCase {
         Iterator<Todo> iterator = sortedTodos.iterator();
 
         Todo testTodo = iterator.next();
-        assertEquals("01", testTodo.getTodoId());
-        testTodo = iterator.next();
-        assertEquals("02", testTodo.getTodoId());
+        assertEquals("04", testTodo.getTodoId());
         testTodo = iterator.next();
         assertEquals("03", testTodo.getTodoId());
         testTodo = iterator.next();
-        assertEquals("04", testTodo.getTodoId());
+        assertEquals("06", testTodo.getTodoId());
+        testTodo = iterator.next();
+        assertEquals("01", testTodo.getTodoId());
         testTodo = iterator.next();
         assertEquals("05", testTodo.getTodoId());
         testTodo = iterator.next();
-        assertEquals("06", testTodo.getTodoId());
+        assertEquals("02", testTodo.getTodoId());
     }
 
     public void testEquals() {
