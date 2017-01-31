@@ -96,7 +96,7 @@ public class UserManagerImplTest extends TestCase {
 
         try {
             userManager.createUser(user);
-            assertTrue(user.isEnabled());
+            assertTrue(user.isDisabled());
             assertNotNull(user.getCreationDate());
             assertNotNull(user.getLastAccessDate());
             assertEquals(1, user.getRoles().size());
