@@ -92,7 +92,7 @@
    </td>
    <td>
     <% if (request.getRemoteUser() != null) { %>
-     <div id="username"><img src="webapp/images/user_suit.png"/> <%=request.getRemoteUser()%></div>
+     <div id="username"><img src="webapp/images/tudu_logo.png"/> <%=request.getRemoteUser()%></div>
     <% } %>    
    </td>
   </tr>
