@@ -113,8 +113,7 @@ public class User implements Serializable, Comparable<User> {
     }
 
     public boolean isEnabled() {
-        //return enabled;
-    	return false;
+        return enabled;    	
     }
 
     public void setEnabled(boolean enabled) {
