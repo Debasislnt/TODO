@@ -109,7 +109,7 @@
 		</dependency>
 	</dependencies>
 	<build>
-		<finalName>DevOps Demo</finalName>
+		<finalName>tudu-dwr</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
