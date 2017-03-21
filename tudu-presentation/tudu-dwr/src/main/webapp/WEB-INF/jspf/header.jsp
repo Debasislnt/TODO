@@ -53,7 +53,7 @@
     
 </head>
 <body onload="initMenu();DWRUtil.useLoadingMessage();">
-<table width="100%"><tr><td width="152"><img src="webapp/images/tudu_logo.png" alt="Tudu Lists" width="150" height="30" border="0"/></td><td>
+<table width="100%"><tr><td width="152"></td><td>
 <menu:useMenuDisplayer 	name="TabbedMenu"
   						bundle="org.apache.struts.action.MESSAGE">
   						
@@ -74,7 +74,7 @@
 %>
 </head>
 <body onload="initMenu();">
-<table width="100%"><tr><td width="152"><img src="webapp/images/tudu_logo.png" alt="Tudu Lists" width="150" height="30" border="0"/></td><td>
+<table width="100%"><tr><td width="152"></td><td>
 <menu:useMenuDisplayer 	name="TabbedMenu"
   						bundle="org.apache.struts.action.MESSAGE">
   						
@@ -92,7 +92,7 @@
    </td>
    <td>
     <% if (request.getRemoteUser() != null) { %>
-     <div id="username"><img src="webapp/images/tudu_logo.png"/> <%=request.getRemoteUser()%></div>
+     <div id="username"> <%=request.getRemoteUser()%></div>
     <% } %>    
    </td>
   </tr>
