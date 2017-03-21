@@ -58,7 +58,7 @@ public class TodoListsDwrImplTest extends TestCase {
         replay_();
 
         boolean rss = todoListsDwr.getTodoList("001").isRssAllowed();
-        assertEquals(false, rss);
+        assertEquals(true, rss);
     }
 
     public void testGetTodoListRss2() {
