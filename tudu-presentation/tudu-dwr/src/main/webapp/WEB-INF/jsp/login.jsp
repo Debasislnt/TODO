@@ -34,7 +34,7 @@
    <form action="<c:url value='/j_acegi_security_check'/>" method="post">
     <table border="0" cellspacing="2" cellpadding="3">
      <tr>
-      <th style="text-align: left">Username :</th>
+      <th style="text-align: left">Login :</th>
       <td style="text-align: left">
        <input 	type="text" 
            		name="j_username" 
